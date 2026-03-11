@@ -1,0 +1,715 @@
+﻿<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>School Quiz PRO - આકોલી  પ્રાથમિક શાળા</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+/* Base Styling */
+        body { margin:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height:100vh; display:flex; justify-content:center; align-items:center; background:#1a1a2e; }
+        .hidden { display:none !important; }
+
+       /* Colorful Working Area (Card with River Theme) */
+        .card { 
+            max-width: 650px; width: 90%; margin: 20px; padding: 30px; 
+            border-radius: 30px; 
+            border: 4px solid #ffffff;
+            position: relative; /* આ જરૂરી છે ફૂટર માટે */
+            padding-bottom: 70px; /* ફૂટર માટે નીચે જગ્યા */
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            background: linear-gradient(120deg, #ff9a9e, #fad0c4, #a18cd1, #fbc2eb); 
+            background-size: 400% 400%; 
+            animation: riverFlow 15s ease infinite; 
+        }
+       
+        @keyframes riverFlow { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+            
+		/* Footer inside card */
+        .p_info {
+            position: absolute;
+            bottom: 15px;
+            left: 25px;
+            font-size: 13px;
+            pointer-events: none;
+		opacity:0.85;
+            user-select: none;
+        }
+
+        /* Colorful Working Area (Card) */
+        
+
+        /* હેડર લેઆઉટમાં ફેરફાર */
+    header { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    position: relative; 
+    margin-bottom: 20px; 
+    padding-left: 90px; /* લોગો નાનો કર્યો એટલે પેડિંગ ઘટાડ્યું */
+    padding-right: 10px; 
+    min-height: 90px; 
+    text-align: center;
+}
+
+    header img { 
+    position: absolute; 
+    left: 0; 
+    top: 50%; /* વર્ટિકલ વચ્ચે લાવવા માટે */
+    transform: translateY(-50%);
+    height: 70px;  /* લોગોની સાઈઝ ઘટાડી */
+    width: 70px;   /* લોગોની સાઈઝ ઘટાડી */
+    object-fit: cover; 
+    background: #fff; 
+    padding: 3px; 
+    border-radius: 50%; 
+    border: 3px solid #673ab7;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+        header div { text-align: center; }
+        h1 { color: #4a148c; margin: 0; font-size: 24px; }
+        p { color: #d81b60; font-weight: bold; margin: 5px 0 0 0; }
+
+        /* Buttons and Inputs */
+        input, select, button { width:100%; padding:14px; margin:8px 0; border-radius:12px; border:none; font-size:16px; background:#f5f5f5; }
+        button { 
+            background: linear-gradient(to right, #673ab7, #9c27b0); color:#fff; font-weight:bold; cursor:pointer; 
+            transition: 0.3s;
+        }
+        button:hover { transform: scale(1.02); filter: brightness(1.1); }
+
+        /* Quiz Palette */
+        .palette { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; padding: 10px; }
+        .palette button { width: 40px; height: 40px; border-radius: 50%; border: none; background: #fff; color: #673ab7; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .palette button.active { background: #673ab7; color: white; transform: scale(1.1); }
+
+        /* Quiz Options */
+        .option { padding: 15px; border-radius: 12px; margin: 10px 0; background: #ffffff; color: #333; cursor: pointer; border: 2px solid #e0e0e0; font-weight: 600; transition: 0.3s; }
+        .option:hover { background: #673ab7; color: white; border-color: #673ab7; }
+        .right { background: #2ecc71 !important; color: white !important; }
+        .wrong { background: #e74c3c !important; color: white !important; }
+        .top { display:flex; justify-content:space-between; font-weight:bold; margin-bottom:15px; }
+        #result-area { text-align: center; }
+         #certificate-display {
+    background: white;
+    border: 10px double #0561af;
+    padding: 25px;
+    border-radius: 20px;
+    color: #333;
+    margin-bottom: 20px;
+}
+	/* Result Stats Styling */
+.stat-box {
+    display: flex;
+    justify-content: space-around;
+    gap: 15px;
+    margin: 20px 0;
+}
+.stat-item {
+    flex: 1;
+    padding: 15px;
+    border-radius: 20px;
+    background: white;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    text-align: center;
+}
+.stat-value {
+    font-size: 35px; /* આંકડા મોટા કર્યા */
+    font-weight: 900;
+    display: block;
+    line-height: 1;
+}
+.stat-label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #555;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Result Table Highlight */
+#teacher table {
+    border-radius: 15px;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+#teacher thead {
+    background: linear-gradient(135deg, #4a148c, #673ab7);
+    color: white;
+}
+#teacher th { padding: 15px; text-transform: uppercase; font-size: 14px; }
+#teacher td { padding: 12px; border-bottom: 1px solid #eee; }
+#teacher tr:hover { background-color: #f1f1f1; }
+ 
+.res-score { color: #2ecc71; font-weight: 900; font-size: 18px; }
+.res-percent { color: #e67e22; font-weight: 900; font-size: 18px; }
+#table tr:nth-child(even) { background-color: #f9f9f9; }
+#table td { text-align: center; border: 1px solid #eee; }
+
+/* સ્કોરને અપૂર્ણાંક (Fraction) જેવો ઉભો બતાવવા માટે */
+.fraction {
+    display: inline-flex;
+    flex-direction: column;
+    vertical-align: middle;
+    align-items: center;
+    font-weight: bold;
+}
+.numerator {
+    border-bottom: 2px solid #4a148c; /* આ આડી લાઈન બનાવશે */
+    padding: 0 5px;
+    color: #27ae60; /* મેળવેલ ગુણનો રંગ */
+    font-size: 18px;
+}
+.denominator {
+    padding: 0 5px;
+    color: #444; /* કુલ ગુણનો રંગ */
+    font-size: 16px;
+}
+  
+
+   #capture-area {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+@media screen and (max-width: 600px) {
+    #capture-area {
+        padding: 15px !important; /* મોબાઈલ માટે પેડિંગ ઓછું કર્યું */
+    }
+}
+
+    </style>
+</head>
+
+<body>
+
+    <div class="card" id="home">
+        <header>
+          <div>
+                <h1> આકોલી પ્રાથમિક શાળા</h1>
+<p>જ્ઞાન સાધના -trial version ક્વિઝ</p>
+<p> KUMPABHAI H PATEL </p>
+
+</div>
+</header>
+
+<input id="roll" placeholder="રોલ નંબર">
+<input id="studentName" placeholder="વિદ્યાર્થીનું નામ">
+
+<select id="subject" onchange="loadChapters();setTheme();">
+<option value="">વિષય પસંદ કરો</option>
+<option value="maths">જ્ઞાન સાધના પરિક્ષા trial </option>
+
+
+</select>
+
+<select id="chapter">
+<option value="">પાઠ પસંદ કરો</option>
+</select>
+
+<button onclick="startQuiz()">ક્વિઝ શરૂ કરો</button>
+<button onclick="openTeacher()" style="background:#444;">👨‍🏫 શિક્ષક લોગિન</button>
+    </div>
+
+<!-- QUIZ -->
+<div class="card hidden" id="quiz">
+        <div class="top"><div id="progress"></div><div id="timer"></div></div>
+        <h3 id="q"></h3>
+        <div id="opts"></div>
+        <div id="palette" class="palette"></div>
+    </div>
+
+    <div class="card hidden" id="result">
+        <h2 id="score"></h2>
+        <div id="grade" style="font-size: 20px; font-weight: bold; margin-bottom:10px;"></div>
+        <div id="details"></div>
+        
+        <button onclick="goHome()">🏠 મુખ્ય મેનુ</button>
+    </div>
+
+    <div class="card hidden" id="teacherLoginBox">
+        <h3>શિક્ષક લોગિન</h3>
+        <input type="password" id="tpass" placeholder="પાસવર્ડ">
+        <button onclick="teacherLogin()">LOGIN</button>
+        <button onclick="goHome()" style="background:#444;">🏠 HOME</button>
+    </div>
+
+    <div class="card hidden" id="teacher">
+        <h3>📊 પરિણામ પત્રક</h3>
+        <table border="1" width="100%" style="background:#fff; color:#333; border-collapse:collapse; padding:10px;">
+            <thead>
+                <tr><th>રોલ</th><th>નામ</th><th>વિષય</th><th>પાઠ</th><th>સ્કોર</th><th>ટકા</th><th>તારીખ</th></tr>
+            </thead>
+            <tbody id="table"></tbody>
+        </table>
+        <br>
+        <button onclick="downloadExcel()">📥 Excel Download</button>
+        <button onclick="clearAllResults()" style="background:#e74c3c;">🗑️ બધું ડિલીટ કરો</button>
+        <button onclick="goHome()" style="background:#444;">🏠 મુખ્ય મેનુ</button>
+    </div>
+<div id="result-area" class="hidden">
+    <div id="certificate-display">
+        </div>
+    <button class="btn" onclick="location.reload()">ફરીથી ટેસ્ટ આપો</button>
+</div>
+<script>
+     // Footer Content
+       
+        // Quiz Data and Logic
+ const DATA = {
+     maths: {
+    "જ્ઞાનસાધના -TESTING": [
+    {q:"'આ તો ઈશ તણો આવાસ' કાવ્યના કવિ કોણ છે?", o:["કરસનદાસ માણેક", "નર્મદ", "દલપતરામ", "ઉમાશંકર જોશી"], a:"કરસનદાસ માણેક"},
+    {q:"'ઈશ' શબ્દનો અર્થ શું થાય છે?", o:["રાજા", "ઈશ્વર", "મનુષ્ય", "સેવક"], a:"ઈશ્વર"},
+   
+    {q:"'તે ત્યક્તેન ભુંજીથા' સૂત્રનો અર્થ શું થાય?", o:["ભોગવીને ત્યાગ કરો", "ત્યાગીને ભોગવી જાણો", "સંગ્રહ કરો", "દાન ન કરો"], a:"ત્યાગીને ભોગવી જાણો"},
+   
+    {q:"સૌ પ્રથમ વાર 'સત્યાગ્રહ' શબ્દ કોણે પ્રયોજ્યો?", o:["ગાંધીજી", "સરદાર પટેલ", "ટિળક", "ગોખલે"], a:"ગાંધીજી"},
+    {q:"દાંડી કૂચ કયા સત્યાગ્રહનો ભાગ હતી?", o:["મીઠાનો સત્યાગ્રહ", "ખેડા સત્યાગ્રહ", "બારડોલી સત્યાગ્રહ", "ચંપારણ સત્યાગ્રહ"], a:"મીઠાનો સત્યાગ્રહ"}
+
+    
+     
+ ]
+
+
+ 
+
+    }
+}; 
+
+   // ઓપ્શન્સને મિક્સ કરવા માટેનું ફંક્શન
+function shuffleArray(array) {
+    let shuffled = [...array]; 
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+      
+ 
+
+let quiz=[],current=0,score=0,timeLeft=1800,timerId;
+let studentAnswers=[],answered=[];
+let results=JSON.parse(localStorage.getItem("results")||"[]");
+let photoURL="";
+
+document.getElementById("photo").onchange=e=>{
+const file=e.target.files[0];
+if(file){
+const reader=new FileReader();
+reader.onload=ev=>photoURL=ev.target.result;
+reader.readAsDataURL(file);
+}
+};
+
+function loadChapters(){
+const ch=document.getElementById("chapter");
+ch.innerHTML='<option value="">પાઠ પસંદ કરો</option>';
+const sub=document.getElementById("subject").value;
+if(sub && DATA[sub]){
+Object.keys(DATA[sub]).forEach(k=>{
+ch.innerHTML+=`<option value="${k}">${k}</option>`;
+});
+}
+}
+
+function setTheme(){
+const sub=document.getElementById("subject").value;
+document.querySelectorAll('.card').forEach(c=>{
+c.classList.remove("river","maths");
+c.classList.add(sub==="maths"?"maths":"river");
+});
+}
+
+function startQuiz(){
+const roll=document.getElementById("roll").value.trim();
+const name=document.getElementById("studentName").value.trim();
+const sub=document.getElementById("subject").value;
+const ch=document.getElementById("chapter").value;
+
+if(!roll||!name||!sub||!ch){alert("બધી માહિતી ભરો!");return;}
+
+quiz=[...(DATA[sub][ch]||[])];
+quiz.sort(()=>Math.random()-0.5);
+
+current=0;score=0;timeLeft=1800;
+studentAnswers=[];
+answered=new Array(quiz.length).fill(false);
+
+document.getElementById("home").classList.add("hidden");
+document.getElementById("quiz").classList.remove("hidden");
+
+createPalette();
+startTimer();
+showQuestion();
+}
+
+function createPalette(){
+const pal=document.getElementById("palette");
+pal.innerHTML="";
+quiz.forEach((_,i)=>{
+const btn=document.createElement("button");
+btn.textContent=i+1;
+btn.id="p"+i;
+btn.onclick=()=>goToQuestion(i);
+pal.appendChild(btn);
+});
+}
+
+function goToQuestion(i){
+current=i;
+showQuestion();
+}
+
+function startTimer(){
+timerId=setInterval(()=>{
+const m=Math.floor(timeLeft/60);
+const s=timeLeft%60;
+document.getElementById("timer").textContent=`⏱ ${m}:${s<10?"0":""}${s}`;
+if(timeLeft<=60) document.getElementById("timer").classList.add("timer-warning");
+timeLeft--;
+if(timeLeft<0) finishQuiz();
+},1000);
+}
+
+function showQuestion(){
+if(current>=quiz.length)return finishQuiz();
+
+document.getElementById("progress").textContent=`પ્રશ્ન ${current+1}/${quiz.length}`;
+document.getElementById("q").textContent=quiz[current].q;
+
+document.querySelectorAll("#palette button").forEach(b=>b.classList.remove("active"));
+document.getElementById("p"+current).classList.add("active");
+
+const opts=document.getElementById("opts");
+opts.innerHTML="";
+
+// ઓપ્શન્સને પહેલા શફલ કરો
+const shuffledOptions = shuffleArray(quiz[current].o);
+
+// હવે શફલ થયેલા ઓપ્શન્સ પર લૂપ ફેરવો
+shuffledOptions.forEach(opt=>{
+    const d=document.createElement("div");
+    d.className="option";
+    d.textContent=opt;
+    d.onclick=()=>checkAnswer(opt,d);
+    opts.appendChild(d);
+});
+}
+
+
+function checkAnswer(selected,element){
+if(answered[current]) return;
+
+const correct=quiz[current].a;
+answered[current]=true;
+
+if(selected===correct){
+score++;
+element.classList.add("right");
+document.getElementById("p"+current).style.background="#28a745";
+}else{
+element.classList.add("wrong");
+document.getElementById("p"+current).style.background="#dc3545";
+[...document.querySelectorAll(".option")].forEach(opt=>{
+if(opt.textContent===correct){
+opt.classList.add("right");
+}
+});
+}
+
+studentAnswers.push({
+question:quiz[current].q,
+selected:selected,
+correct:correct,
+isCorrect:selected===correct
+});
+
+setTimeout(()=>{
+current++;
+showQuestion();
+},800);
+}
+
+function finishQuiz() {
+    clearInterval(timerId);
+    document.getElementById("quiz").classList.add("hidden");
+    const resDiv = document.getElementById("result");
+    resDiv.classList.remove("hidden");
+
+    const percent = Math.round((score / quiz.length) * 100);
+    const sName = document.getElementById("studentName").value.trim();
+    const roll = document.getElementById("roll").value.trim();
+    const sub = document.getElementById("subject").value;
+    const ch = document.getElementById("chapter").value;
+    
+    let wrongCount = quiz.length - score;
+
+    // અહીં હેડિંગમાં વિદ્યાર્થીનું નામ ઉમેર્યું છે
+    let html = `
+        <h2 style="color:#1a1a2e; text-align:center; font-size:26px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">
+            🌟 ${sName} નું પરિણામ 🌟
+        </h2>
+        
+        <div class="stat-box">
+            <div class="stat-item" style="border-bottom: 5px solid #2ecc71;">
+                <span class="stat-value" style="color:#2ecc71;">${score}</span>
+                <span class="stat-label">સાચા જવાબ</span>
+            </div>
+            <div class="stat-item" style="border-bottom: 5px solid #e74c3c;">
+                <span class="stat-value" style="color:#e74c3c;">${wrongCount}</span>
+                <span class="stat-label">ખોટા જવાબ</span>
+            </div>
+            <div class="stat-item" style="border-bottom: 5px solid #f1c40f;">
+                <span class="stat-value" style="color:#f1c40f;">${percent}%</span>
+                <span class="stat-label">ટકાવારી</span>
+            </div>
+        </div>
+    `;
+
+    // ભૂલો બતાવવાનું લિસ્ટ - અહીં ફોન્ટ ડાર્ક કર્યા છે
+    let wrongList = studentAnswers.filter(a => !a.isCorrect);
+    if (wrongList.length > 0) {
+        html += "<h3 style='color:#d81b60; text-align:left; margin-left:10px; font-size:18px;'>❌ તમારી ભૂલો સુધારો:</h3>";
+        html += "<div style='max-height:220px; overflow-y:auto; margin-bottom:15px; padding:5px;'>";
+        wrongList.forEach((w, index) => {
+            html += `
+                <div style="background:white; padding:12px; margin-bottom:10px; border-radius:12px; font-size:15px; box-shadow:0 4px 6px rgba(0,0,0,0.05); text-align:left; color:#1a1a2e; border-left:6px solid #e74c3c;">
+                    <b style="color:#444;">પ્રશ્ન ${index + 1}:</b> <span style="font-weight:600;">${w.question}</span><br>
+                    <div style="margin-top:5px;">
+                        <span style="color:#d32f2f; font-weight:bold;">તમારો જવાબ: ${w.selected}</span><br>
+                        <span style="color:#1b5e20; font-weight:bold;">સાચો જવાબ: ${w.correct}</span>
+                    </div>
+                </div>`;
+        });
+        html += "</div>";
+    } else {
+        html += "<div style='background:#27ae60; color:white; padding:15px; border-radius:10px; margin-bottom:15px; font-weight:bold;'>અદભુત! તમે બધા જ સાચા જવાબ આપ્યા છે. 🏆</div>";
+    }
+
+    html += `
+        <button onclick="showFinalCertificate()" style="background:#2ecc71; font-size:18px; padding:15px; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);">📜 VIEW CERTIFICATE</button>
+        <button onclick="goHome()" style="background:#444; margin-top:8px;">🏠 મુખ્ય મેનુ</button>
+    `;
+    resDiv.innerHTML = html;
+
+    saveResultToLocal(roll, sName, sub, ch, score, quiz.length, percent);
+}
+function saveResultToLocal(roll, name, subject, chapter, score, total, percent) {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString() + " " + now.getHours() + ":" + now.getMinutes();
+    
+    const newResult = {
+        roll: roll,
+        name: name,
+        subject: subject,
+        chapter: chapter,
+        score: score,
+        total: total,
+        percent: percent,
+        date: dateStr
+    };
+
+    results.push(newResult);
+    localStorage.setItem("results", JSON.stringify(results));
+}
+function showFinalCertificate() {
+    const resDiv = document.getElementById("result");
+    let percentage = Math.round((score / quiz.length) * 100);
+    let sName = document.getElementById("studentName").value.trim();
+    let chName = document.getElementById("chapter").value;
+    
+    let feedback = (percentage >= 80) ? "ખૂબ સરસ! 🏆" : (percentage >= 50) ? "સરસ પ્રયત્ન! 👍" : "ફરી પ્રયત્ન કરો. 💪";
+    let color = (percentage >= 50) ? "#27ae60" : "#e74c3c";
+
+    resDiv.innerHTML = `
+        <div id="capture-area" style="background: white; border: 10px double #0561af; padding: 20px; border-radius: 15px; text-align: center; color: #333; width: 100%; max-width: 550px; margin: 0 auto; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+            
+            <h2 style="color: #0561af; margin: 0; font-size: 24px; text-decoration: underline;">અભિનંદન પત્ર</h2>
+            
+            <p style="font-size: 14px; margin: 10px 0;">આથી પ્રમાણપત્ર  આપવામાં આવે છે કે, આપે <b>"${chName}"</b> પાઠની ક્વિઝમાં સફળતાપૂર્વક ભાગ લીધેલ છે.</p>
+            
+           <h3 style="font-size: 32px; color: #191970; border-bottom: 2px solid #34495e; display: inline-block; padding: 0 20px; margin: 10px 0; font-family: 'Segoe UI', Arial, sans-serif; font-weight: 700; letter-spacing: 1px;">
+                 ${sName}
+             </h3>
+           
+            
+            <table style="width: 100%; margin: 10px auto; border-collapse: collapse; font-size: 14px; background: #f9f9f9;">
+                <thead style="background: #0561af; color: white;">
+                    <tr>
+                        <th style="padding: 8px; border: 1px solid #ddd;">મેળવેલ ગુણ</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">કુલ ગુણ</th>
+                        <th style="padding: 8px; border: 1px solid #ddd;">ટકાવારી</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; color: #27ae60;">${score}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">${quiz.length}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; color: #e67e22;">${percentage}%</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p style="font-size: 16px; font-weight: bold; color: ${color}; margin: 5px 0;">${feedback}</p>
+            
+            <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid #eee; padding-top: 10px;">
+                <div style="text-align: left;">
+                    <p style="font-size: 11px; color: #666; margin: 0;">તારીખ: ${new Date().toLocaleDateString()}</p>
+                </div>
+                <div style="text-align: right;">
+                    <p style="font-weight: bold; color: #0561af; margin: 0; font-size: 13px;">આકોલી પ્રાથમિક શાળા</p>
+                    <p style="font-size: 12px; color: #333; margin: 0;">માર્ગદર્શક: શ્રી કુમ્પાભાઈ પટેલ</p>
+                </div>
+            </div>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+            <button onclick="downloadCert()" style="background:#3498db; width: 100%; border-radius: 10px; padding: 12px; font-weight: bold;">📥 પ્રમાણપત્ર ડાઉનલોડ</button>
+            <button onclick="location.reload()" style="background: #444; width: 100%; border-radius: 10px; padding: 10px;">🏠 મુખ્ય મેનુ</button>
+        </div>
+    `;
+}
+// સર્ટિફિકેટ ડાઉનલોડ કરવાનું ફંક્શન
+function downloadCert() {
+    const area = document.getElementById("capture-area");
+    html2canvas(area).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'My_Certificate.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    });
+}
+function openTeacher(){
+    document.getElementById("home").classList.add("hidden");
+    document.getElementById("teacherLoginBox").classList.remove("hidden");
+}
+
+function teacherLogin(){
+    // તમારો પાસવર્ડ અહીં બદલી શકાય છે
+    if(document.getElementById("tpass").value === "admin123"){
+        document.getElementById("teacherLoginBox").classList.add("hidden");
+        document.getElementById("teacher").classList.remove("hidden");
+
+        // ટેબલમાં ડેટા બતાવવાનું લોજિક
+        const tableBody = document.getElementById("table");
+        tableBody.innerHTML = results.map(r => `
+            <tr>
+                <td style="padding:10px; border:1px solid #ddd;">${r.roll}</td>
+                <td style="padding:10px; border:1px solid #ddd;">${r.name}</td>
+                <td style="padding:10px; border:1px solid #ddd;">${r.subject}</td>
+                <td style="padding:10px; border:1px solid #ddd;">${r.chapter}</td>
+               <td>
+                   <div class="fraction">
+                     <span class="numerator">${r.score}</span>
+                     <span class="denominator">${r.total}</span>
+                  </div>
+                </td>
+
+                <td class="res-percent">${r.percent}%</td>
+                <td style="padding:10px; border:1px solid #ddd;">${r.date}</td>
+
+             
+            </tr>
+        `).join("");
+    } else {
+        alert("ખોટો પાસવર્ડ! ફરીથી પ્રયત્ન કરો.");
+    }
+}
+
+
+
+function downloadExcel() {
+    if (results.length === 0) {
+        alert("ડાઉનલોડ કરવા માટે કોઈ ડેટા નથી!");
+        return;
+    }
+
+    // Excel ને ગુજરાતી સમજાવવા માટે BOM ઉમેરવો જરૂરી છે
+    let csvContent = "\uFEFF"; // આ BOM છે જે ગુજરાતી અક્ષરોને Excel માં સાચા બતાવશે
+    csvContent += "Roll No,Name,Subject,Chapter,Score,Total,Percentage,Date\n";
+
+    results.forEach(r => {
+        let row = `${r.roll},${r.name},${r.subject},${r.chapter},${r.score},${r.total},${r.percent}%,${r.date}`;
+        csvContent += row + "\n";
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "Quiz_Results_Antrol_School.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function showResult() {
+    const resultDiv = document.getElementById("result");
+    
+    let percentage = (score / quiz.length) * 100;
+    let sName = document.getElementById("studentName").value.trim();
+    let feedback = (percentage >= 50) ? "ખૂબ સરસ! મહેનત રંગ લાવી. 🌟" : "વધુ મહેનત કરો, તમે કરી શકો છો! 💪";
+    let color = (percentage >= 50) ? "#27ae60" : "#e74c3c";
+
+    resultDiv.innerHTML = `
+        <div id="certificate" style="background: white; border: 8px double #0561af; padding: 25px; border-radius: 20px; text-align: center; color: #333; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+            <h2 style="color: #0561af; margin: 0; font-size: 28px;">અભિનંદન પત્ર</h2>
+            <p style="font-size: 16px; margin: 10px 0;">આથી પ્રમાણપત્ર આપવામાં આવે છે કે,</p>
+            <h3 style="font-size: 26px; color: #1a1a2e; border-bottom: 2px solid #ddd; display: inline-block; padding: 0 10px;">${sName}</h3>
+            <p style="font-size: 16px; margin: 10px 0;">એ ક્વિઝમાં શ્રેષ્ઠ પ્રદર્શન કરી મેળવેલ ગુણ:</p>
+            <div style="font-size: 45px; font-weight: bold; color: ${color}; margin: 15px 0;">
+                ${score} / ${quiz.length}
+            </div>
+            <p style="font-size: 18px; font-weight: bold; color: ${color};">${feedback}</p>
+            <p style="margin-top: 20px; font-weight: bold; color: #0561af; border-top: 1px solid #eee; padding-top: 10px;">આકોલી પ્રાથમિક શાળા</p>
+            <p style="font-size: 12px; color: #666;">માર્ગદર્શક: શ્રી કુમ્પાભાઈ પટેલ</p>
+        </div>
+        <button class="btn" onclick="location.reload()" style="margin-top: 20px; width: 100%; padding: 12px; border-radius: 12px; border: none; background: #673ab7; color: white; font-weight: bold; cursor: pointer;">🏠 મુખ્ય મેનુ</button>
+    `;
+}
+
+
+function goHome(){location.reload();}
+function clearAllResults(){
+    if(results.length === 0) return;
+    if(confirm("શું તમે ખરેખર બધા પરિણામો ડિલીટ કરવા માંગો છો? આ ડેટા પાછો નહીં મળે.")){
+        localStorage.removeItem("results");
+        results = [];
+        document.getElementById("table").innerHTML = "";
+        alert("બધા પરિણામો સફળતાપૂર્વક ડિલીટ થયા છે.");
+    }
+}
+
+</script>
+<div class="p_info"></div>
+
+<script>
+(function(){
+
+let a=[80,73,78,65,76,32,83,79,76,65,78,75,73];
+let b=[65,110,116,114,111,108,32,80,114,105,109,97,114,121,32,83,99,104,111,111,108];
+
+function decode(arr){
+    return arr.map(x=>String.fromCharCode(x)).join('');
+}
+
+let footerHTML =
+"<p style='color:#0561af;font-family:Arial,sans-serif;font-weight:bold;'>"
++ decode(a) +
+" , <span style='color:#555;font-weight:normal;'>"
++ decode(b) +
+"</span></p>";
+
+document.querySelectorAll('.card').forEach(card=>{
+    let d=document.createElement("div");
+    d.className="p_info";
+    d.innerHTML=footerHTML;
+    card.appendChild(d);
+});
+
+})();
+</script>
+</body>
+</html>
